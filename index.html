@@ -709,13 +709,22 @@
     }
     @media (max-width: 720px) {
       nav { padding: 16px 20px; }
-      nav.scrolled { padding: 12px 20px; }
+      nav.scrolled { padding: 12px 20px; backdrop-filter: none; -webkit-backdrop-filter: none; }
       .nav-links { display: none; }
       .nav-burger { display: flex; margin-right: 8px; }
       .hero-content { padding: 120px 20px 80px; }
       .hero-actions { gap: 12px; }
       .hero-actions .btn-primary,
       .hero-actions .btn-ghost { flex: 1; justify-content: center; }
+      .btn-ghost { backdrop-filter: none; -webkit-backdrop-filter: none; }
+
+      /* About: disable scroll animation, static layout */
+      .about { height: auto; }
+      .about-sticky { position: relative; height: auto; min-height: 0; overflow: visible; padding: 72px 0 64px; background: var(--bg); }
+      .about-canvas { display: none; }
+      .about-mask { display: none; }
+      .about-content { padding: 0 20px; max-width: 100%; }
+      .value-item { opacity: 1; transform: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
 
       .services { padding: 80px 20px; }
       .services-hd { flex-direction: column; align-items: flex-start; gap: 14px; }
@@ -728,8 +737,6 @@
       .gallery { padding: 80px 20px; }
       .gallery-grid { grid-template-columns: 1fr; }
       .contact { padding: 80px 20px; }
-      .about-content { padding: 56px 20px; }
-      .about-sticky { height: auto; min-height: 100vh; overflow: visible; padding-bottom: 56px; }
       footer { padding: 48px 20px 0; grid-template-columns: 1fr; }
       .f-bottom { margin: 32px -20px 0; padding: 18px 20px; flex-direction: column; gap: 6px; text-align: center; }
     }
@@ -1344,6 +1351,15 @@
 
   // Scroll-driven image-sequence animation (Apple-style, zero seek latency)
   (function () {
+    // On mobile: skip canvas entirely — show value items immediately
+    if (window.innerWidth <= 720) {
+      ['vi-1','vi-2','vi-3'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.classList.add('in');
+      });
+      return;
+    }
+
     const TOTAL   = 95;
     const EASE    = 0.055;
     const section = document.getElementById('par-mums');
