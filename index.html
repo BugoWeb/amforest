@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AM Forest — Mežapstrāde &amp; Mežapsaimniekošana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #f7f4ee;
+      --bg-alt:      #edeae0;
+      --surface:     #ffffff;
+      --surface-alt: #f0ede5;
+      --text:        #1a1914;
+      --text-2:      #5a5649;
+      --text-3:      #9a9589;
+      --green:       #697F3E;
+      --green-mid:   #7A9346;
+      --leaf:        #B2CC3C;
+      --wood:        #7a5028;
+      --bark:        #c8aa82;
+      --border:      rgba(26,25,20,.08);
+      --border-2:    rgba(26,25,20,.15);
+      --sh-soft:     0 4px 20px rgba(26,25,20,.06);
+      --sh-med:      0 8px 40px rgba(26,25,20,.10);
+      --sh-str:      0 20px 60px rgba(26,25,20,.15);
+      --r-sm: 8px; --r-md: 16px; --r-lg: 24px; --r-xl: 36px;
+      --ease: cubic-bezier(.16,1,.3,1);
+      --bounce: cubic-bezier(.34,1.56,.64,1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Playfair Display', serif;
+      font-weight: 600;
+      line-height: 1.15;
+      letter-spacing: 0em;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 22px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: transparent;
+      border-bottom: 1px solid transparent;
+      box-shadow: none;
+      transition: background .75s cubic-bezier(.4,0,.2,1),
+                  border-color .75s cubic-bezier(.4,0,.2,1),
+                  box-shadow .75s cubic-bezier(.4,0,.2,1),
+                  padding .75s cubic-bezier(.4,0,.2,1),
+                  backdrop-filter .75s cubic-bezier(.4,0,.2,1);
+    }
+    nav.scrolled {
+      background: rgba(247,244,238,.92);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 24px rgba(26,25,20,.06);
+      padding: 14px 48px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--text);
+    }
+    .nav-logo-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem; font-weight: 600; letter-spacing: 0.02em;
+    }
+    .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+    .nav-links a {
+      text-decoration: none; color: var(--text-2);
+      font-size: .875rem; font-weight: 500;
+      position: relative; transition: color .2s;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -2px; left: 0;
+      width: 0; height: 1px; background: var(--green);
+      transition: width .3s var(--ease);
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-cta {
+      background: var(--green) !important; color: #fff !important;
+      padding: 10px 22px; border-radius: 100px;
+      font-weight: 500 !important; transition: all .3s var(--ease) !important;
+    }
+    .nav-cta::after { display: none !important; }
+    .nav-cta:hover {
+      background: var(--green-mid) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(105,127,62,.3);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100dvh;
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .hero-video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%; object-fit: cover;
+      z-index: 0;
+      filter: saturate(.78) brightness(.96);
+    }
+    .hero-mask {
+      position: absolute; inset: 0; z-index: 1;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 72% 66% at 50% 50%, rgba(247,244,238,.52) 0%, transparent 100%),
+        linear-gradient(to bottom, #f7f4ee 0%, transparent 22%),
+        linear-gradient(to top,    #f7f4ee 0%, transparent 42%),
+        linear-gradient(to right,  #f7f4ee 0%, transparent 34%),
+        linear-gradient(to left,   #f7f4ee 0%, transparent 34%);
+    }
+    .hero-content {
+      position: relative; z-index: 2;
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center;
+      max-width: 840px;
+      padding: 180px 48px 120px;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-size: .72rem; font-weight: 700; letter-spacing: .18em;
+      text-transform: uppercase; color: var(--text);
+      background: rgba(247,244,238,.82);
+      backdrop-filter: blur(8px);
+      padding: 7px 16px 7px 12px;
+      border-radius: 100px;
+      border: 1px solid rgba(26,25,20,.1);
+      margin-bottom: 36px;
+      opacity: 0; transform: translateY(20px);
+      animation: fadeUp .8s var(--ease) .15s forwards;
+    }
+    .hero-eyebrow::before {
+      content: ''; display: block; width: 18px; height: 1px;
+      background: var(--green);
+    }
+    .hero-title {
+      font-size: clamp(3.2rem, 5.8vw, 6rem);
+      font-weight: 700; color: var(--text); margin-bottom: 28px;
+      line-height: 1.08; letter-spacing: 0em;
+      text-shadow: 0 0 40px rgba(247,244,238,.6), 0 0 80px rgba(247,244,238,.3);
+      opacity: 0; transform: translateY(30px);
+      animation: fadeUp 1s var(--ease) .35s forwards;
+    }
+    .hero-title em { font-style: italic; color: var(--green); }
+    .hero-desc {
+      font-size: 1.05rem; color: var(--text);
+      max-width: 46ch; line-height: 1.75; margin-bottom: 52px;
+      text-shadow: 0 0 30px rgba(247,244,238,.7), 0 0 60px rgba(247,244,238,.35);
+      opacity: 0; transform: translateY(20px);
+      animation: fadeUp .8s var(--ease) .55s forwards;
+    }
+    .hero-actions {
+      display: flex; align-items: center; justify-content: center; gap: 22px;
+      opacity: 0; transform: translateY(20px);
+      animation: fadeUp .8s var(--ease) .72s forwards;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--green); color: #fff;
+      padding: 16px 32px; border-radius: 100px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600; font-size: .95rem;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: all .3s var(--ease);
+    }
+    .btn-primary:hover {
+      background: var(--green-mid);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(105,127,62,.35);
+    }
+    .btn-primary:active { transform: scale(.98); }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 10px;
+      color: var(--text); font-size: .95rem; font-weight: 600;
+      text-decoration: none; transition: all .2s;
+      background: rgba(247,244,238,.82);
+      backdrop-filter: blur(8px);
+      padding: 12px 18px 12px 20px;
+      border-radius: 100px;
+      border: 1px solid rgba(26,25,20,.12);
+      text-shadow: 0 0 20px rgba(247,244,238,.6);
+    }
+    .btn-ghost:hover { color: var(--text); background: rgba(247,244,238,.95); }
+    .btn-ghost:hover .ghost-arrow { background: var(--text); border-color: var(--text); color: #fff; transform: translateX(4px); }
+    .ghost-arrow {
+      width: 34px; height: 34px; border: 1px solid var(--border-2);
+      border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+      transition: all .3s var(--ease);
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: rgba(247,244,238,.95);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      padding: 16px 22px; border-radius: var(--r-md);
+      box-shadow: var(--sh-med);
+      margin-top: 36px;
+      opacity: 0; transform: translateY(20px);
+      animation: fadeUp .8s var(--ease) .95s forwards;
+    }
+    .hero-badge-icon {
+      width: 40px; height: 40px; background: #eef1e0;
+      border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--green); flex-shrink: 0;
+    }
+    .hero-badge-lbl { font-size: .72rem; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+    .hero-badge-val { font-size: .96rem; font-weight: 600; color: var(--text); }
+
+    /* ── TICKER ── */
+    .ticker {
+      background: var(--green); padding: 16px 0; overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .ticker-track {
+      display: flex; gap: 0;
+      animation: marquee 32s linear infinite;
+      white-space: nowrap; width: max-content;
+    }
+    .ticker-item {
+      display: inline-flex; align-items: center; gap: 20px;
+      padding: 0 32px;
+      color: rgba(255,255,255,.88);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: .82rem; font-weight: 400;
+      letter-spacing: .06em; text-transform: uppercase;
+      flex-shrink: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+    .ticker-dot {
+      width: 4px; height: 4px;
+      background: var(--leaf); border-radius: 50%; flex-shrink: 0;
+      opacity: .9;
+    }
+
+    /* ── SECTION UTILITY ── */
+    .tag {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-size: .68rem; font-weight: 700; letter-spacing: .16em;
+      text-transform: uppercase; color: var(--green); margin-bottom: 22px;
+    }
+    .tag-line { display: block; width: 22px; height: 1px; background: var(--green); }
+
+    /* ── ABOUT ── */
+    .about {
+      position: relative;
+      height: 280vh;
+      background: var(--bg);
+    }
+    .about-sticky {
+      position: sticky; top: 0;
+      height: 100vh; overflow: hidden;
+      display: flex; align-items: center;
+    }
+    .about-canvas {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%; display: block;
+      z-index: 0;
+      filter: saturate(.82) brightness(.92);
+    }
+    .about-mask {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background:
+        linear-gradient(to right,  #f7f4ee 0%, rgba(247,244,238,.72) 40%, transparent 70%),
+        linear-gradient(to bottom, #f7f4ee 0%, transparent 16%),
+        linear-gradient(to top,    #f7f4ee 0%, transparent 20%);
+    }
+    .about-content {
+      position: relative; z-index: 2;
+      padding: 0 80px;
+      max-width: 660px;
+      display: flex; flex-direction: column;
+    }
+    .about-title { font-size: clamp(2rem,3.2vw,3rem); font-weight: 600; margin-bottom: 28px; }
+    .about-title em { font-style: italic; color: var(--wood); }
+    .about-text { font-size: .98rem; color: var(--text-2); line-height: 1.8; max-width: 54ch; margin-bottom: 18px; }
+    .value-list { margin-top: 36px; display: flex; flex-direction: column; gap: 14px; }
+    .value-item {
+      display: flex; align-items: flex-start; gap: 16px;
+      padding: 18px 20px; border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      background: rgba(255,255,255,.82);
+      backdrop-filter: blur(12px);
+      transition: opacity .55s var(--ease), transform .55s var(--ease), border-color .3s, box-shadow .3s;
+      opacity: 0; transform: translateY(18px);
+    }
+    .value-item.in { opacity: 1; transform: translateY(0); }
+    .value-item:hover { border-color: var(--green); box-shadow: var(--sh-soft); }
+    .value-item:hover {
+      border-color: var(--green);
+      box-shadow: var(--sh-soft);
+      transform: translateX(4px);
+    }
+    .value-icon {
+      width: 42px; height: 42px; background: #eef1e0;
+      border-radius: var(--r-sm); display: flex;
+      align-items: center; justify-content: center;
+      color: var(--green); flex-shrink: 0;
+    }
+    .value-text h4 { font-family: 'Plus Jakarta Sans',sans-serif; font-size: .9rem; font-weight: 600; margin-bottom: 3px; }
+    .value-text p { font-size: .8rem; color: var(--text-2); line-height: 1.5; }
+
+    /* ── SERVICES (BENTO) ── */
+    .services {
+      padding: 120px 60px;
+      background: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .services-hd {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-bottom: 56px;
+    }
+    .services-title {
+      font-size: clamp(2.2rem,3.5vw,3.6rem);
+      font-weight: 600; color: #f7f4ee; max-width: 380px;
+    }
+    .services-title em { font-style: italic; color: var(--leaf); }
+    .services-sub {
+      font-size: .9rem; color: rgba(247,244,238,.62);
+      max-width: 300px; line-height: 1.65; text-align: right;
+    }
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(12,1fr);
+      gap: 14px;
+    }
+    .bc {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--r-lg); padding: 36px;
+      position: relative; overflow: hidden;
+      transition: all .4s var(--ease);
+    }
+    .bc:hover {
+      background: rgba(255,255,255,.075);
+      border-color: rgba(255,255,255,.16);
+      transform: translateY(-4px);
+      box-shadow: 0 24px 48px rgba(0,0,0,.28);
+    }
+    .bc1 { grid-column: span 5; min-height: 360px; }
+    .bc2 { grid-column: span 4; min-height: 360px; }
+    .bc3 { grid-column: span 3; min-height: 360px; }
+    .bc4 { grid-column: span 7; min-height: 270px; }
+    .bc5 { grid-column: span 5; min-height: 270px; }
+    .bc-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 5.5rem; font-weight: 700;
+      color: rgba(255,255,255,.05);
+      position: absolute; top: -14px; right: 20px;
+      line-height: 1; letter-spacing: -.05em;
+      pointer-events: none;
+    }
+    .bc-icon {
+      width: 48px; height: 48px;
+      background: rgba(178,204,60,.14);
+      border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--leaf); margin-bottom: 28px;
+    }
+    .bc-tag {
+      display: inline-block;
+      font-size: .68rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--leaf);
+      background: rgba(178,204,60,.1);
+      padding: 4px 10px; border-radius: 100px; margin-bottom: 14px;
+    }
+    .bc-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem; font-weight: 600;
+      color: #f7f4ee; margin-bottom: 12px; line-height: 1.3;
+
+    }
+    .bc-text { font-size: .858rem; color: rgba(247,244,238,.75); line-height: 1.72; }
+    .bc-list {
+      list-style: none; margin-top: 16px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .bc-list li {
+      font-size: .82rem; color: rgba(247,244,238,.75);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .bc-list li::before {
+      content: ''; display: block;
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--leaf); flex-shrink: 0;
+    }
+    .bc-bg-img { display: none; }
+    .bc.has-img {
+      background:
+        linear-gradient(rgba(26,25,20,.80), rgba(26,25,20,.80)),
+        var(--bc-img) center/cover no-repeat;
+    }
+    .bc.has-img:hover {
+      background:
+        linear-gradient(rgba(26,25,20,.68), rgba(26,25,20,.68)),
+        var(--bc-img) center/cover no-repeat;
+      border-color: rgba(255,255,255,.16);
+      transform: translateY(-4px);
+      box-shadow: 0 24px 48px rgba(0,0,0,.28);
+    }
+/* ── BUYING ── */
+    .buying {
+      padding: 100px 60px;
+      background: var(--bg-alt);
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+      align-items: center;
+    }
+    .buying-content {}
+    .buying-title { font-size: clamp(1.9rem,2.8vw,2.6rem); font-weight: 600; margin-bottom: 20px; line-height: 1.2; }
+    .buying-title em { font-style: italic; color: var(--green); }
+    .buying-text { font-size: .98rem; color: var(--text-2); line-height: 1.8; max-width: 50ch; margin-bottom: 32px; }
+    .buying-types {
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .buying-type {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 20px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-md); transition: all .3s var(--ease);
+    }
+    .buying-type:hover { border-color: var(--green); box-shadow: var(--sh-soft); transform: translateX(4px); }
+    .buying-type-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    .buying-type-text { font-size: .9rem; color: var(--text); font-weight: 500; }
+    .buying-highlight {
+      background: var(--green); border-radius: var(--r-xl);
+      padding: 48px 44px; color: #fff;
+      display: flex; flex-direction: column; gap: 20px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+    .buying-highlight-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.85rem; font-weight: 600; line-height: 1.3;
+      color: #fff;
+      letter-spacing: 0em;
+
+    }
+    .buying-highlight-title em { font-style: italic; color: var(--leaf); }
+    .buying-highlight-text { font-size: .92rem; color: rgba(255,255,255,.78); line-height: 1.75; -webkit-font-smoothing: antialiased; }
+    .buying-highlight-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.12); color: #fff;
+      padding: 13px 24px; border-radius: 100px;
+      font-size: .9rem; font-weight: 600; text-decoration: none;
+      border: 1px solid rgba(255,255,255,.2);
+      transition: all .3s var(--ease); align-self: flex-start;
+    }
+    .buying-highlight-cta:hover { background: rgba(255,255,255,.22); transform: translateY(-2px); }
+
+    /* ── PROCESS ── */
+    .process { padding: 120px 60px; background: var(--bg); }
+    .process-hd { max-width: 560px; margin-bottom: 72px; }
+    .process-step {
+      display: grid; grid-template-columns: 80px 1fr 2.4fr;
+      gap: 40px; padding: 40px 0;
+      border-top: 1px solid var(--border);
+      align-items: start;
+    }
+    .process-step:last-child { border-bottom: 1px solid var(--border); }
+    .process-step:hover .ps-title { color: var(--green); }
+    .ps-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: .85rem; font-weight: 500; color: var(--text-3); letter-spacing: .06em; padding-top: 4px; }
+    .ps-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem; font-weight: 600;
+      color: var(--text); line-height: 1.25;
+
+      transition: color .3s;
+    }
+    .ps-text { font-size: .9rem; color: var(--text-2); line-height: 1.8; }
+
+    /* ── GALLERY ── */
+    .gallery { padding: 120px 60px; background: var(--bg-alt); }
+    .gallery-hd { margin-bottom: 52px; }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .gallery-item {
+      border-radius: var(--r-md); overflow: hidden;
+      aspect-ratio: 3/2; cursor: pointer;
+      position: relative;
+    }
+    .gallery-img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: saturate(.8);
+      transition: all .6s var(--ease);
+    }
+    .gallery-item:hover .gallery-img { transform: scale(1.06); filter: saturate(1); }
+    .gallery-item-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(26,25,20,.4) 0%, transparent 60%);
+      opacity: 0; transition: opacity .4s;
+    }
+    .gallery-item:hover .gallery-item-overlay { opacity: 1; }
+
+    /* ── CONTACT ── */
+    .contact {
+      padding: 120px 60px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 100px;
+    }
+    .contact-title {
+      font-size: clamp(2rem,3.2vw,3.2rem);
+      font-weight: 600; margin-bottom: 22px; line-height: 1.15;
+    }
+    .contact-title em { font-style: italic; color: var(--green); }
+    .contact-txt { font-size: .98rem; color: var(--text-2); line-height: 1.75; max-width: 44ch; margin-bottom: 48px; }
+    .contact-details { display: flex; flex-direction: column; gap: 18px; }
+    .cd { display: flex; align-items: center; gap: 16px; }
+    .cd-icon {
+      width: 46px; height: 46px; background: #eef1e0;
+      border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--green); flex-shrink: 0;
+    }
+    .cd-lbl { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); }
+    .cd-val { font-size: .94rem; color: var(--text); font-weight: 500; }
+    .form { display: flex; flex-direction: column; gap: 18px; }
+    .fg { display: flex; flex-direction: column; gap: 6px; }
+    .fl { font-size: .78rem; font-weight: 600; color: var(--text-2); letter-spacing: .02em; }
+    .fi, .ft, .fs {
+      background: var(--surface); border: 1px solid var(--border-2);
+      border-radius: var(--r-md); padding: 14px 18px;
+      font-family: 'Plus Jakarta Sans',sans-serif; font-size: .94rem;
+      color: var(--text); outline: none;
+      transition: all .2s; width: 100%;
+    }
+    .fi:focus, .ft:focus, .fs:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(105,127,62,.1);
+    }
+    .ft { min-height: 140px; resize: vertical; line-height: 1.6; }
+    .fs { cursor: pointer; }
+    .fr { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--text); padding: 64px 60px 0;
+      display: grid; grid-template-columns: 2.2fr 1fr 1fr 1fr; gap: 60px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .f-brand { display: flex; flex-direction: column; gap: 16px; }
+    .f-logo {
+      display: flex; align-items: center; gap: 10px;
+      color: #f7f4ee;
+      font-family: 'Playfair Display', serif; font-size: 1.08rem; font-weight: 600;
+    }
+    .f-tag { font-size: .86rem; color: rgba(247,244,238,.55); line-height: 1.7; max-width: 280px; }
+    .f-reg { font-size: .76rem; color: rgba(247,244,238,.35); line-height: 1.85; margin-top: 8px; }
+    .f-col-title {
+      font-size: .7rem; font-weight: 600; letter-spacing: .14em;
+      text-transform: uppercase; color: rgba(247,244,238,.9); margin-bottom: 20px;
+    }
+    .f-links { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .f-links a {
+      text-decoration: none; font-size: .86rem;
+      color: rgba(247,244,238,.52); transition: color .2s;
+    }
+    .f-links a:hover { color: #f7f4ee; }
+    .f-bottom {
+      background: rgba(0,0,0,.22); margin: 40px -60px 0;
+      padding: 20px 60px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .f-copy { font-size: .78rem; color: rgba(247,244,238,.35); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes imgReveal {
+      to { transform: scale(1); }
+    }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    .reveal {
+      opacity: 0; transform: translateY(32px);
+      transition: opacity .8s var(--ease), transform .8s var(--ease);
+    }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+    .d1 { transition-delay: .1s; }
+    .d2 { transition-delay: .2s; }
+    .d3 { transition-delay: .3s; }
+    .d4 { transition-delay: .4s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+      .about-content { padding: 0 24px; max-width: 100%; }
+      .bc1,.bc4 { grid-column: span 12; }
+      .bc2,.bc5 { grid-column: span 6; }
+      .bc3 { grid-column: span 6; }
+      .buying { grid-template-columns: 1fr; }
+      .contact { grid-template-columns: 1fr; gap: 56px; }
+      footer { grid-template-columns: 1fr 1fr; gap: 40px; }
+      .gallery-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 720px) {
+      nav { padding: 16px 20px; }
+      nav.scrolled { padding: 12px 20px; }
+      .nav-links { display: none; }
+      .hero-content { padding: 120px 20px 80px; }
+
+      .services { padding: 80px 20px; }
+      .services-hd { flex-direction: column; align-items: flex-start; gap: 14px; }
+      .services-sub { text-align: left; }
+      .bc1,.bc2,.bc3,.bc4,.bc5 { grid-column: span 12; }
+      .buying { padding: 80px 20px; }
+      .process { padding: 80px 20px; }
+      .process-step { grid-template-columns: 52px 1fr; }
+      .ps-text { grid-column: span 2; padding-left: 52px; }
+      .gallery { padding: 80px 20px; }
+      .gallery-grid { grid-template-columns: 1fr; }
+      .contact { padding: 80px 20px; }
+      .about-content { padding: 56px 20px; }
+      footer { padding: 48px 20px 0; grid-template-columns: 1fr; }
+      .f-bottom { margin: 32px -20px 0; padding: 18px 20px; flex-direction: column; gap: 6px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ NAV ══════════════════════════════════════════════════════════════ -->
+<nav id="nav">
+  <a href="#" class="nav-logo">
+    <img src="logo.png" alt="AM Forest" style="height:52px; width:auto; display:block; image-rendering:-webkit-optimize-contrast; -ms-interpolation-mode:bicubic;" />
+  </a>
+  <ul class="nav-links">
+    <li><a href="#par-mums">Par Mums</a></li>
+    <li><a href="#pakalpojumi">Pakalpojumi</a></li>
+    <li><a href="#ieperkam">Iepērkam</a></li>
+    <li><a href="#galerija">Galerija</a></li>
+    <li><a href="#kontakti">Kontakti</a></li>
+    <li><a href="#kontakti" class="nav-cta">Sazināties</a></li>
+  </ul>
+</nav>
+
+<!-- ══ HERO ══════════════════════════════════════════════════════════════ -->
+<section class="hero">
+  <video class="hero-video" autoplay muted loop playsinline>
+    <source src="hero-pingpong.mp4" type="video/mp4">
+  </video>
+  <div class="hero-mask"></div>
+  <div class="hero-content">
+    <span class="hero-eyebrow">SIA AM Forest &middot; Kopš 2013</span>
+    <h1 class="hero-title">
+      Jūsu meža<br><em>uzticamais</em><br>partneris
+    </h1>
+    <p class="hero-desc">
+      Profesionāla mežizstrāde un mežu apsaimniekošana Latvijā.
+      Iepērkam meža īpašumus un nodrošinām <strong>tūlītēju samaksu</strong> —
+      godīgi, ātri, droši.
+    </p>
+    <div class="hero-actions">
+      <a href="#pakalpojumi" class="btn-primary">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8H13M9 4L13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Apskatīt Pakalpojumus
+      </a>
+      <a href="#ieperkam" class="btn-ghost">
+        Iepērkam Mežus
+        <span class="ghost-arrow">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+            <path d="M2.5 9.5L9.5 2.5M9.5 2.5H4M9.5 2.5V8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </a>
+    </div>
+    <div class="hero-badge">
+      <div class="hero-badge-icon">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="hero-badge-lbl">Galvenā Priekšrocība</div>
+        <div class="hero-badge-val">Garantējam tūlītēju samaksu!</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TICKER ════════════════════════════════════════════════════════════ -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="ticker-dot"></span>Mežizstrāde</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Sanitārās Cirtes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Kopšanas Cirtes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Kailcirtes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Meža Atjaunošana</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Jaunaudžu Kopšana</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Iepērkam Mežus</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Tūlītēja Samaksa</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Meža Taksācija</span>
+    <!-- duplicate -->
+    <span class="ticker-item"><span class="ticker-dot"></span>Mežizstrāde</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Sanitārās Cirtes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Kopšanas Cirtes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Kailcirtes</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Meža Atjaunošana</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Jaunaudžu Kopšana</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Iepērkam Mežus</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Tūlītēja Samaksa</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Meža Taksācija</span>
+  </div>
+</div>
+
+<!-- ══ ABOUT ══════════════════════════════════════════════════════════════ -->
+<section class="about" id="par-mums">
+  <div class="about-sticky">
+    <canvas class="about-canvas" id="about-canvas"></canvas>
+    <div class="about-mask"></div>
+    <div class="about-content">
+      <span class="tag"><span class="tag-line"></span>Par Mums</span>
+      <h2 class="about-title">
+        Kurzemes<br><em>meža profesionāļi</em>
+      </h2>
+      <p class="about-text">
+        SIA "AM Forest" ir Kuldīgā dibināts uzņēmums, kas specializējas
+        mežizstrādē un mežu apsaimniekošanā visā Latvijas teritorijā.
+        Mūsu darbā centrā ir klienta ērtības — ātra vienošanās,
+        godīgas cenas un garantēta tūlītēja samaksa.
+      </p>
+      <p class="about-text">
+        Mēs iepērkam meža īpašumus dažādos izstrādes posmos —
+        izstrādātus, daļēji izstrādātus un neizstrādātus —
+        kā arī pie ceļa esošus apaļkokus. Ar mums darījums
+        norisinās ātri un bez liekiem sarežģījumiem.
+      </p>
+      <div class="value-list">
+        <div class="value-item" id="vi-1">
+          <div class="value-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <div class="value-text">
+            <h4>Tūlītēja Samaksa</h4>
+            <p>Garantējam nekavējošu norēķinu par katru meža īpašumu vai izstrādāto koksni.</p>
+          </div>
+        </div>
+        <div class="value-item" id="vi-2">
+          <div class="value-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="value-text">
+            <h4>Ātra Vienošanās</h4>
+            <p>No pirmā zvana līdz darījumam — minimāls laiks un dokumentu apjoms.</p>
+          </div>
+        </div>
+        <div class="value-item" id="vi-3">
+          <div class="value-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+            </svg>
+          </div>
+          <div class="value-text">
+            <h4>Individuāla Pieeja</h4>
+            <p>Katrs īpašums ir unikāls — piedāvājam godīgu novērtējumu konkrētajā situācijā.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SERVICES BENTO ════════════════════════════════════════════════════ -->
+<section class="services" id="pakalpojumi">
+  <div class="services-hd">
+    <h2 class="services-title reveal">Mūsu <em>pakalpojumi</em></h2>
+    <p class="services-sub reveal d2">
+      Pilns mežizstrādes un mežu apsaimniekošanas pakalpojumu
+      klāsts privātiem un juridiskiem īpašniekiem.
+    </p>
+  </div>
+  <div class="bento">
+
+    <!-- 1: Mežizstrāde -->
+    <div class="bc bc1 reveal has-img" style="--bc-img: url('old-7.jpg')">
+      <span class="bc-num">01</span>
+      <div class="bc-icon">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <span class="bc-tag">Galvenais Pakalpojums</span>
+      <h3 class="bc-title">Mežizstrādes Pakalpojumi</h3>
+      <p class="bc-text">Veicam pilnu mežizstrādes ciklu — no cirsmas sagatavošanas līdz koksnes transportēšanai. Strādājam ar modernām mehanizētām iekārtām, nodrošinot darba kvalitāti un drošību.</p>
+      <ul class="bc-list">
+        <li>Sanitārās cirtes</li>
+        <li>Kopšanas cirtes</li>
+        <li>Kailcirtes</li>
+      </ul>
+    </div>
+
+    <!-- 2: Mežu apsaimniekošana -->
+    <div class="bc bc2 reveal d1 has-img" style="--bc-img: url('old-8.jpg')">
+      <span class="bc-num">02</span>
+      <div class="bc-icon">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+      </div>
+      <h3 class="bc-title">Mežu Apsaimniekošana</h3>
+      <p class="bc-text">Sakārtojam jūsu meža īpašumu, sagatavojam taksācijas dokumentus un izstrādājam cirsmām nepieciešamos dokumentus. Komplekss apsaimniekošanas risinājums.</p>
+      <ul class="bc-list">
+        <li>Meža sakārtošana</li>
+        <li>Taksācijas sagatavošana</li>
+        <li>Meža sagatavošana ciršanai</li>
+      </ul>
+    </div>
+
+    <!-- 3: Atjaunošana -->
+    <div class="bc bc3 reveal d2 has-img" style="--bc-img: url('old-9.jpg')">
+      <span class="bc-num">03</span>
+      <div class="bc-icon">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      </div>
+      <h3 class="bc-title">Meža Atjaunošana</h3>
+      <p class="bc-text">Nodrošinām meža atjaunošanu un apmežošanu, jaunaudžu kopšanu un grāvju, ceļmalu veģetācijas novākšanu.</p>
+      <ul class="bc-list">
+        <li>Apmežošana</li>
+        <li>Jaunaudžu kopšana</li>
+        <li>Grāvju tīrīšana</li>
+      </ul>
+    </div>
+
+    <!-- 4: Iepirkšana -->
+    <div class="bc bc4 reveal d1 has-img" style="--bc-img: url('real-4.jpg')">
+      <span class="bc-num">04</span>
+      <div class="bc-icon">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+          <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+        </svg>
+      </div>
+      <h3 class="bc-title">Iepērkam Meža Īpašumus</h3>
+      <p class="bc-text">
+        Iepērkam meža īpašumus visā Latvijā neatkarīgi no to stāvokļa vai izstrādes pakāpes. Arī īpašumus ar apgrūtinājumiem. Garantējam tūlītēju samaksu un ātru darījuma noformēšanu.
+      </p>
+    </div>
+
+    <!-- 5: Apaļkoki -->
+    <div class="bc bc5 reveal d2 has-img" style="--bc-img: url('old-6.jpg')">
+      <span class="bc-num">05</span>
+      <div class="bc-icon">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <line x1="12" y1="2" x2="12" y2="22"/>
+          <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+        </svg>
+      </div>
+      <h3 class="bc-title">Apaļkoku Iepirkšana</h3>
+      <p class="bc-text">
+        Iepērkam pie ceļa esošus visas sortimentu šķiras apaļkokus. Piedāvājam godīgas tirgus cenas un ātrus norēķinus bez liekas kavēšanās.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ BUYING HIGHLIGHT ══════════════════════════════════════════════════ -->
+<section class="buying" id="ieperkam">
+  <div class="buying-content reveal">
+    <span class="tag"><span class="tag-line"></span>Iepērkam</span>
+    <h2 class="buying-title">Ko mēs <em>iepērkam?</em></h2>
+    <p class="buying-text">
+      Mēs iepērkam dažāda veida meža īpašumus un koksni visā Latvijā.
+      Īpašuma stāvoklis nav šķērslis — strādājam ar jebkuru situāciju.
+    </p>
+    <div class="buying-types">
+      <div class="buying-type">
+        <div class="buying-type-dot"></div>
+        <span class="buying-type-text">Izstrādātus meža īpašumus</span>
+      </div>
+      <div class="buying-type">
+        <div class="buying-type-dot"></div>
+        <span class="buying-type-text">Daļēji izstrādātus meža īpašumus</span>
+      </div>
+      <div class="buying-type">
+        <div class="buying-type-dot"></div>
+        <span class="buying-type-text">Neizstrādātus meža īpašumus</span>
+      </div>
+      <div class="buying-type">
+        <div class="buying-type-dot"></div>
+        <span class="buying-type-text">Īpašumus ar apgrūtinājumiem</span>
+      </div>
+      <div class="buying-type">
+        <div class="buying-type-dot"></div>
+        <span class="buying-type-text">Pie ceļa esošus apaļkokus (visas šķiras)</span>
+      </div>
+    </div>
+  </div>
+  <div class="buying-highlight reveal d2">
+    <h3 class="buying-highlight-title">
+      Garantējam<br><em>tūlītēju samaksu!</em>
+    </h3>
+    <p class="buying-highlight-text">
+      Neatkarīgi no darījuma apjoma — samaksu saņemat nekavējoties
+      pēc vienošanās noslēgšanas. Bez kavēšanās, bez papildu nosacījumiem.
+      Zvaniet Mārtiņam un saņemiet piedāvājumu jau šodien.
+    </p>
+    <a href="tel:25622269" class="buying-highlight-cta">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 12a19.79 19.79 0 01-3.07-8.67A2 2 0 013.6 1.15h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 8.91a16 16 0 006 6l.72-.72a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+      </svg>
+      Zvanīt: 25622269
+    </a>
+  </div>
+</section>
+
+<!-- ══ PROCESS ════════════════════════════════════════════════════════════ -->
+<section class="process">
+  <div class="process-hd reveal">
+    <span class="tag"><span class="tag-line"></span>Kā Mēs Strādājam</span>
+    <h2 class="about-title" style="font-size:clamp(1.9rem,3vw,2.75rem);">
+      No zvana līdz <em>samaksai</em>
+    </h2>
+  </div>
+  <div>
+    <div class="process-step reveal">
+      <span class="ps-num">01</span>
+      <h3 class="ps-title">Sazināšanās</h3>
+      <p class="ps-text">Zvaniet vai rakstiet mums — Mārtiņš uzklausīs jūsu situāciju un vajadzības. Nav svarīgi, vai jums ir liels meža masīvs vai neliela cirsma, mēs izskatīsim katru gadījumu.</p>
+    </div>
+    <div class="process-step reveal d1">
+      <span class="ps-num">02</span>
+      <h3 class="ps-title">Novērtēšana</h3>
+      <p class="ps-text">Izvērtējam jūsu meža īpašumu vai koksni un sagatavojam godīgu tirgus vērtības piedāvājumu, ņemot vērā koksnes kvalitāti, šķiru un atrašanās vietu.</p>
+    </div>
+    <div class="process-step reveal d2">
+      <span class="ps-num">03</span>
+      <h3 class="ps-title">Vienošanās</h3>
+      <p class="ps-text">Noslēdzam darījumu ar minimālu dokumentu apjomu un maksimālu caurspīdīgumu. Jūs vienmēr zināt, par ko un cik saņemsiet.</p>
+    </div>
+    <div class="process-step reveal d3">
+      <span class="ps-num">04</span>
+      <h3 class="ps-title">Tūlītēja Samaksa</h3>
+      <p class="ps-text">Pēc vienošanās noslēgšanas veicam samaksu nekavējoties. Tas ir mūsu galvenais solījums — ātra un droša nauda jūsu rokās.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ GALLERY ════════════════════════════════════════════════════════════ -->
+<section class="gallery" id="galerija">
+  <div class="gallery-hd reveal">
+    <span class="tag"><span class="tag-line"></span>Galerija</span>
+    <h2 class="about-title" style="font-size:clamp(1.9rem,3vw,2.75rem);">Mūsu darbi <em>dabā</em></h2>
+  </div>
+  <div class="gallery-grid">
+    <div class="gallery-item">
+      <img src="old-1.jpg" alt="AM Forest mežizstrāde" class="gallery-img"/>
+      <div class="gallery-item-overlay"></div>
+    </div>
+    <div class="gallery-item">
+      <img src="old-2.jpg" alt="AM Forest mežizstrāde" class="gallery-img"/>
+      <div class="gallery-item-overlay"></div>
+    </div>
+    <div class="gallery-item">
+      <img src="old-3.jpg" alt="AM Forest mežizstrāde" class="gallery-img"/>
+      <div class="gallery-item-overlay"></div>
+    </div>
+    <div class="gallery-item">
+      <img src="old-4.jpg" alt="AM Forest mežizstrāde" class="gallery-img"/>
+      <div class="gallery-item-overlay"></div>
+    </div>
+    <div class="gallery-item">
+      <img src="old-5.jpg" alt="AM Forest mežizstrāde" class="gallery-img"/>
+      <div class="gallery-item-overlay"></div>
+    </div>
+    <div class="gallery-item">
+      <img src="real-1.jpg" alt="Baļķu krautuve ziemā" class="gallery-img"/>
+      <div class="gallery-item-overlay"></div>
+    </div>
+    <div class="gallery-item">
+      <img src="real-2.jpg" alt="Mežizstrādes tehnika" class="gallery-img"/>
+      <div class="gallery-item-overlay"></div>
+    </div>
+    <div class="gallery-item">
+      <img src="real-3.jpg" alt="Sakrauti baļķi" class="gallery-img"/>
+      <div class="gallery-item-overlay"></div>
+    </div>
+    <div class="gallery-item">
+      <img src="real-5.jpg" alt="Bērzu meža ainava" class="gallery-img"/>
+      <div class="gallery-item-overlay"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CONTACT ════════════════════════════════════════════════════════════ -->
+<section class="contact" id="kontakti">
+  <div>
+    <span class="tag reveal"><span class="tag-line"></span>Kontakti</span>
+    <h2 class="contact-title reveal d1">
+      Sazināties<br>ar <em>AM Forest</em>
+    </h2>
+    <p class="contact-txt reveal d2">
+      Ja jums ir meža īpašums, ko vēlaties pārdot vai izstrādāt —
+      zvaniet mums jau šodien. Mārtiņš atbildēs uz visiem
+      jūsu jautājumiem un piedāvās labāko risinājumu.
+    </p>
+    <div class="contact-details reveal d3">
+      <div class="cd">
+        <div class="cd-icon">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        </div>
+        <div>
+          <div class="cd-lbl">Adrese</div>
+          <div class="cd-val">Ēdoles iela 56, Kuldīga, LV-3301</div>
+        </div>
+      </div>
+      <div class="cd">
+        <div class="cd-icon">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 12a19.79 19.79 0 01-3.07-8.67A2 2 0 013.6 1.15h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 8.91a16 16 0 006 6l.72-.72a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="cd-lbl">Tālrunis — Mārtiņš</div>
+          <div class="cd-val">25622269</div>
+        </div>
+      </div>
+      <div class="cd">
+        <div class="cd-icon">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 12a19.79 19.79 0 01-3.07-8.67A2 2 0 013.6 1.15h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 8.91a16 16 0 006 6l.72-.72a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="cd-lbl">Fakss</div>
+          <div class="cd-val">63321302</div>
+        </div>
+      </div>
+      <div class="cd">
+        <div class="cd-icon">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div>
+          <div class="cd-lbl">E-pasts</div>
+          <div class="cd-val">info@amforest.lv</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <form class="form reveal d2" onsubmit="handleSubmit(event)" novalidate>
+    <div class="fr">
+      <div class="fg">
+        <label class="fl">Vārds</label>
+        <input class="fi" type="text" placeholder="Jānis Bērziņš" required/>
+      </div>
+      <div class="fg">
+        <label class="fl">Tālrunis</label>
+        <input class="fi" type="tel" placeholder="+371 2X XXX XXX"/>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">E-pasts</label>
+      <input class="fi" type="email" placeholder="janis@gmail.com" required/>
+    </div>
+    <div class="fg">
+      <label class="fl">Pakalpojums</label>
+      <select class="fs">
+        <option value="">Izvēlieties pakalpojumu...</option>
+        <option>Mežizstrādes pakalpojumi</option>
+        <option>Mežu apsaimniekošana</option>
+        <option>Meža īpašuma pārdošana</option>
+        <option>Apaļkoku pārdošana</option>
+        <option>Meža atjaunošana</option>
+        <option>Cits jautājums</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="fl">Jūsu Ziņojums</label>
+      <textarea class="ft" placeholder="Pastāstiet par savu meža īpašumu vai jautājumu..."></textarea>
+    </div>
+    <button type="submit" class="btn-primary" style="align-self:flex-start;" id="submit-btn">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+        <path d="M14 2L7 9M14 2L9 14L7 9L2 7L14 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Nosūtīt Ziņojumu
+    </button>
+  </form>
+</section>
+
+<!-- ══ FOOTER ════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="f-brand">
+    <div class="f-logo">
+      <img src="logo.png" alt="AM Forest" style="height:36px; width:auto; filter: drop-shadow(0 0 6px rgba(255,255,255,0.55)) drop-shadow(0 0 2px rgba(255,255,255,0.4));" />
+    </div>
+    <p class="f-tag">
+      Profesionāla mežizstrāde un mežu apsaimniekošana visā Latvijā.
+      Garantējam tūlītēju samaksu par jūsu meža īpašumu.
+    </p>
+    <p class="f-reg">
+      SIA "AM Forest" &middot; Reģ. Nr. LV40103347835<br>
+      Banka: NDEALV2X &middot; Konta Nr. LV55 NDEA 0000 0833 9152 9
+    </p>
+  </div>
+  <div>
+    <div class="f-col-title">Pakalpojumi</div>
+    <ul class="f-links">
+      <li><a href="#pakalpojumi">Mežizstrāde</a></li>
+      <li><a href="#pakalpojumi">Sanitārās Cirtes</a></li>
+      <li><a href="#pakalpojumi">Kopšanas Cirtes</a></li>
+      <li><a href="#pakalpojumi">Meža Atjaunošana</a></li>
+      <li><a href="#pakalpojumi">Taksācija</a></li>
+    </ul>
+  </div>
+  <div>
+    <div class="f-col-title">Iepērkam</div>
+    <ul class="f-links">
+      <li><a href="#ieperkam">Meža Īpašumus</a></li>
+      <li><a href="#ieperkam">Izstrādātus Mežus</a></li>
+      <li><a href="#ieperkam">Neizstrādātus Mežus</a></li>
+      <li><a href="#ieperkam">Apaļkokus</a></li>
+    </ul>
+  </div>
+  <div>
+    <div class="f-col-title">Kontakti</div>
+    <ul class="f-links">
+      <li><a href="tel:25622269">25622269 (Mārtiņš)</a></li>
+      <li><a href="tel:63321302">63321302 (Fakss)</a></li>
+      <li><a href="mailto:info@amforest.lv">info@amforest.lv</a></li>
+      <li><a href="#kontakti">Ēdoles iela 56, Kuldīga</a></li>
+    </ul>
+  </div>
+  <div class="f-bottom">
+    <span class="f-copy">© 2013–2026 SIA "AM Forest". Visas tiesības aizsargātas.</span>
+    <span class="f-copy">Ēdoles iela 56, Kuldīga, LV-3301, Latvija</span>
+  </div>
+</footer>
+
+<script>
+  // Nav scroll
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 50);
+  }, { passive: true });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.1, rootMargin: '0px 0px -56px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Bento 3D tilt
+  document.querySelectorAll('.bc').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = ((e.clientX - r.left) / r.width  - .5) * 7;
+      const y = ((e.clientY - r.top)  / r.height - .5) * 7;
+      card.style.transform = `translateY(-4px) rotateX(${-y}deg) rotateY(${x}deg)`;
+      card.style.transformStyle = 'preserve-3d';
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+  });
+
+  // Form submit
+  function handleSubmit(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    btn.innerHTML = `
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+        <path d="M2 8L6 12L14 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Nosūtīts!`;
+    btn.style.background = '#7A9346';
+    setTimeout(() => {
+      btn.innerHTML = `
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+          <path d="M14 2L7 9M14 2L9 14L7 9L2 7L14 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Nosūtīt Ziņojumu`;
+      btn.style.background = '#697F3E';
+      e.target.reset();
+    }, 3200);
+  }
+
+  // Scroll-driven image-sequence animation (Apple-style, zero seek latency)
+  (function () {
+    const TOTAL   = 95;
+    const EASE    = 0.055;
+    const section = document.getElementById('par-mums');
+    const canvas  = document.getElementById('about-canvas');
+    const ctx     = canvas.getContext('2d');
+    const items   = [
+      { el: document.getElementById('vi-1'), at: 0.30 },
+      { el: document.getElementById('vi-2'), at: 0.52 },
+      { el: document.getElementById('vi-3'), at: 0.72 },
+    ];
+
+    // Size canvas to fill its container
+    function resize() {
+      canvas.width  = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      drawFrame(Math.round(smoothP * (TOTAL - 1)));
+    }
+    window.addEventListener('resize', resize);
+
+    // Draw a frame centred + cover-cropped
+    function drawFrame(idx) {
+      var img = frames[idx];
+      if (!img || !img.complete || !img.naturalWidth) return;
+      var cw = canvas.width, ch = canvas.height;
+      var iw = img.naturalWidth, ih = img.naturalHeight;
+      var scale = Math.max(cw / iw, ch / ih);
+      var sw = iw * scale, sh = ih * scale;
+      ctx.drawImage(img, (cw - sw) / 2, (ch - sh) / 2, sw, sh);
+    }
+
+    // Preload all frames
+    var frames = [];
+    var loaded = 0;
+    for (var i = 0; i < TOTAL; i++) {
+      (function (idx) {
+        var img = new Image();
+        img.onload = function () {
+          loaded++;
+          if (loaded === 1) { resize(); drawFrame(0); } // show first frame fast
+        };
+        img.src = 'af/f' + String(idx + 1).padStart(4, '0') + '.jpg';
+        frames[idx] = img;
+      })(i);
+    }
+
+    // Lerp scroll driver
+    var targetP = 0, smoothP = 0, rafId = null, lastIdx = -1;
+
+    function getProgress() {
+      var rect  = section.getBoundingClientRect();
+      var total = section.offsetHeight - window.innerHeight;
+      return Math.max(0, Math.min(1, -rect.top / total));
+    }
+
+    function tick() {
+      smoothP += (targetP - smoothP) * EASE;
+      var idx = Math.round(smoothP * (TOTAL - 1));
+      if (idx !== lastIdx) { drawFrame(idx); lastIdx = idx; }
+
+      items.forEach(function (item) {
+        item.el.classList.toggle('in', targetP >= item.at);
+      });
+
+      if (Math.abs(smoothP - targetP) > 0.0002) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        smoothP = targetP;
+        var fi = Math.round(smoothP * (TOTAL - 1));
+        if (fi !== lastIdx) { drawFrame(fi); lastIdx = fi; }
+        rafId = null;
+      }
+    }
+
+    function wake() {
+      targetP = getProgress();
+      if (!rafId) rafId = requestAnimationFrame(tick);
+    }
+
+    window.addEventListener('scroll', wake, { passive: true });
+    resize();
+    wake();
+  })();
+
+</script>
+</body>
+</html>
